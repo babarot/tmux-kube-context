@@ -10,9 +10,10 @@ A tmux plugin that displays the current Kubernetes context and namespace in the 
 
 - Displays current Kubernetes context and namespace
 - Automatically updates based on your kubectl configuration
-- Customizable colors and formatting
+- Customizable colors, formatting, prefix/suffix
 - Strips cloud provider prefixes and region suffixes (GCP, AWS, Azure)
 - Hostname-based activation for sharing tmux.conf across multiple machines
+- Directory-based activation for project-specific display
 - Clean, readable display format with colon separator (project:cluster/namespace)
 
 ## Installation
@@ -102,6 +103,31 @@ For powerline-style separators:
 set -g @kube-context-separator ''
 ```
 
+### Prefix and Suffix
+
+Customize the prefix and suffix around the context display:
+
+```tmux
+set -g @kube-context-prefix '('
+set -g @kube-context-suffix ')'
+```
+
+Default: `(` for prefix, `)` for suffix
+
+To remove parentheses completely:
+
+```tmux
+set -g @kube-context-prefix ''
+set -g @kube-context-suffix ''
+```
+
+Custom brackets or indicators:
+
+```tmux
+set -g @kube-context-prefix '['
+set -g @kube-context-suffix ']'
+```
+
 ### Enabled Hosts
 
 Specify which hosts (by hostname) should enable this plugin. Useful when sharing tmux.conf across multiple machines:
@@ -188,7 +214,7 @@ run '~/.tmux/plugins/tpm/tpm'
 
 ## Display Format
 
-The plugin displays the context and namespace in the following format:
+The plugin displays the context and namespace in the following format (with parentheses by default):
 
 ```
 (project:cluster/namespace)
@@ -197,6 +223,8 @@ The plugin displays the context and namespace in the following format:
 For example:
 - `(myproject:production/default)`
 - `(minikube/kube-system)`
+
+**Note:** The parentheses can be customized or removed using `@kube-context-prefix` and `@kube-context-suffix` options.
 
 Cloud provider prefixes and region suffixes are automatically stripped and formatted for cleaner display:
 - GCP: `gke_project_asia-northeast1-a_cluster` → `project:cluster`

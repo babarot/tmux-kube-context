@@ -21,7 +21,7 @@ kube_separator="$(get_tmux_option "@kube-context-separator" "")"
 # Build display format string
 display_format="#[bg=${kube_bg},fg=${kube_fg}"
 [[ -n "${kube_bold}" ]] && display_format="${display_format},${kube_bold}"
-display_format="${display_format}] (#(${CURRENT_DIR}/scripts/kube-context.sh)) "
+display_format="${display_format}] #(${CURRENT_DIR}/scripts/kube-context.sh) "
 
 # Add separator if configured
 if [[ -n "${kube_separator}" ]]; then

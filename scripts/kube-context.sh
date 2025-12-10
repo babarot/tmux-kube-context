@@ -108,4 +108,8 @@ case "${context}" in
     ;;
 esac
 
-echo "${context}/${namespace}"
+# Get prefix and suffix for display format
+prefix="$(get_tmux_option "@kube-context-prefix" "(")"
+suffix="$(get_tmux_option "@kube-context-suffix" ")")"
+
+echo "${prefix}${context}/${namespace}${suffix}"
