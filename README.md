@@ -120,18 +120,17 @@ run '~/.tmux/plugins/tpm/tpm'
 The plugin displays the context and namespace in the following format:
 
 ```
-(context-name/namespace)
+(project:cluster/namespace)
 ```
 
 For example:
-- `(gke_my-project/default)`
+- `(myproject:production/default)`
 - `(minikube/kube-system)`
-- `(my-cluster/production)`
 
-Cloud provider region suffixes are automatically stripped for cleaner display:
-- GCP: `gke_project_asia-northeast1-a_cluster` → `gke_project_cluster`
+Cloud provider prefixes and region suffixes are automatically stripped and formatted for cleaner display:
+- GCP: `gke_project_asia-northeast1-a_cluster` → `project:cluster`
 - AWS: `arn:aws:eks:us-west-2:account:cluster/name` → `name`
-- Azure: `context_eastus` → `context`
+- Azure: `aks_project_eastus_cluster` → `project:cluster`
 
 ## Requirements
 
