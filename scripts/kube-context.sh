@@ -14,6 +14,15 @@ get_tmux_option() {
   echo "${value:-${default}}"
 }
 
+# Check if plugin should be enabled (hostname/directory conditions)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if ! "${SCRIPT_DIR}/check-enabled.sh"; then
+  # Conditions don't match - fallback to original status-left
+  original="$(get_tmux_option "@kube-context-original-status-left" "")"
+  echo "${original}"
+  exit 0
+fi
+
 # Check if kubectl is available
 if ! command -v kubectl &>/dev/null; then
   echo "N/A"
@@ -75,8 +84,24 @@ case "${context}" in
     ;;
 esac
 
-# Get prefix and suffix for display format
+# Get user configuration for display format
+kube_bg="$(get_tmux_option "@kube-context-bg" "default")"
+kube_fg="$(get_tmux_option "@kube-context-fg" "blue")"
+kube_bold="$(get_tmux_option "@kube-context-bold" "")"
+kube_separator="$(get_tmux_option "@kube-context-separator" "")"
 prefix="$(get_tmux_option "@kube-context-prefix" "(")"
 suffix="$(get_tmux_option "@kube-context-suffix" ")")"
 
-echo "${prefix}${context}/${namespace}${suffix}"
+# Build display format string with tmux color codes
+display_format="#[bg=${kube_bg},fg=${kube_fg}"
+[[ -n "${kube_bold}" ]] && display_format="${display_format},${kube_bold}"
+display_format="${display_format}] ${prefix}${context}/${namespace}${suffix} "
+
+# Add separator if configured
+if [[ -n "${kube_separator}" ]]; then
+  display_format="${display_format}#[bg=default,fg=${kube_bg}]${kube_separator}#[default] "
+else
+  display_format="${display_format}#[default]"
+fi
+
+echo "${display_format}"
