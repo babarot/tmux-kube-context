@@ -29,26 +29,41 @@ fi
 #   - GCP: gke_project_asia-northeast1-a_cluster -> project:cluster
 #   - AWS: arn:aws:eks:us-west-2:account:cluster/name -> name
 #   - Azure: aks_project_eastus_cluster -> project:cluster
-context="${context##*/}"  # Remove path-like prefixes (for ARN)
 
-# Remove cloud provider prefixes first (gke_, aks_, eks_, etc.)
-context="${context#gke_}"
-context="${context#aks_}"
-context="${context#eks_}"
-
-# Now remove region patterns - since provider prefix is gone, we can safely match region patterns
-# Remove GCP-style region patterns: _region-zone_ or _region-zone at the end
-# Pattern matches: _word-word+digits-letter[_] (e.g., _asia-northeast1-a_)
-context="$(echo "${context}" | sed -E 's/_[a-z]+-[a-z]+[0-9]+-[a-z]_/_/g; s/_[a-z]+-[a-z]+[0-9]+-[a-z]$//')"
-# Remove AWS-style region patterns: _region-zone_ (middle) or at the end
-# Pattern matches: _word-word-digits[_] (e.g., _us-west-2_)
-context="$(echo "${context}" | sed -E 's/_[a-z]+-[a-z]+-[0-9]+_/_/g; s/_[a-z]+-[a-z]+-[0-9]+$//')"
-# Remove Azure-style regions: _eastus_, _westus_, _eastus2_, etc.
-# After removing provider prefix, the format is: project_region_cluster
-# Match common Azure region patterns in the middle position
-context="$(echo "${context}" | sed -E 's/_(east|west|central|north|south)(us|eu|asia|uk|au|in|japan|korea|canada|france|germany|brazil|uae)[0-9]*_/_/')"
-
-# Replace first underscore with colon for better readability (project:cluster)
-context="${context/_/:}"
+# Detect cloud provider and apply appropriate formatting
+case "${context}" in
+  gke_*)
+    # GCP: Remove gke_ prefix and region pattern
+    context="${context#gke_}"
+    # Remove GCP-style region patterns: _region-zone_ or _region-zone at the end
+    # Pattern matches: _word-word+digits-letter[_] (e.g., _asia-northeast1-a_)
+    context="$(echo "${context}" | sed -E 's/_[a-z]+-[a-z]+[0-9]+-[a-z]_/_/g; s/_[a-z]+-[a-z]+[0-9]+-[a-z]$//')"
+    # Replace underscore with colon for readability (project:cluster)
+    context="${context/_/:}"
+    ;;
+  aks_*)
+    # Azure: Remove aks_ prefix and region pattern
+    context="${context#aks_}"
+    # Remove Azure-style regions: _eastus_, _westus_, _eastus2_, etc.
+    # Format is typically: project_region_cluster
+    context="$(echo "${context}" | sed -E 's/_(east|west|central|north|south)(us|eu|asia|uk|au|in|japan|korea|canada|france|germany|brazil|uae)[0-9]*_/_/')"
+    # Replace underscore with colon for readability (project:cluster)
+    context="${context/_/:}"
+    ;;
+  arn:aws:eks:*|eks_*)
+    # AWS: Handle ARN format or eks_ prefix
+    context="${context##*/}"  # Remove path-like prefixes (for ARN)
+    context="${context#eks_}"
+    # Remove AWS-style region patterns: _region-zone_ (middle) or at the end
+    # Pattern matches: _word-word-digits[_] (e.g., _us-west-2_)
+    context="$(echo "${context}" | sed -E 's/_[a-z]+-[a-z]+-[0-9]+_/_/g; s/_[a-z]+-[a-z]+-[0-9]+$//')"
+    # Replace underscore with colon for readability (project:cluster)
+    context="${context/_/:}"
+    ;;
+  *)
+    # Other providers or local clusters (minikube, kind, etc.) - no transformation
+    :
+    ;;
+esac
 
 echo "${context}/${namespace}"
