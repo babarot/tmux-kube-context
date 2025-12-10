@@ -1,5 +1,7 @@
 # tmux-kube-context
 
+![tmux-kube-context in action](image.png)
+
 A tmux plugin that displays the current Kubernetes context and namespace in the status bar.
 
 ![](https://img.shields.io/badge/tmux-plugin-blue)
@@ -9,7 +11,9 @@ A tmux plugin that displays the current Kubernetes context and namespace in the 
 - Displays current Kubernetes context and namespace
 - Automatically updates based on your kubectl configuration
 - Customizable colors and formatting
-- Strips GCP region suffixes for cleaner display
+- Strips cloud provider prefixes and region suffixes (GCP, AWS, Azure)
+- Hostname-based activation for sharing tmux.conf across multiple machines
+- Clean, readable display format with colon separator (project:cluster/namespace)
 
 ## Installation
 
@@ -32,7 +36,7 @@ Then press `prefix + I` to install the plugin.
 
 2. Source the plugin in your `~/.tmux.conf`:
    ```tmux
-   run '~/.tmux/plugins/tmux-kube-context/main.tmux'
+   run '~/.tmux/plugins/tmux-kube-context/kube-context.tmux'
    ```
 
 3. Reload tmux configuration:
