@@ -44,17 +44,27 @@ Then press `prefix + I` to install the plugin.
 
 The plugin supports the following options (set in your `~/.tmux.conf`):
 
-### Color
+### Foreground Color
 
-Set the color of the Kubernetes context display:
+Set the text color of the Kubernetes context display:
 
 ```tmux
-set -g @kube-context-color 'blue'
+set -g @kube-context-fg 'blue'
 ```
 
 Default: `blue`
 
 Available colors: `black`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`, or any color code.
+
+### Background Color
+
+Set the background color of the Kubernetes context display:
+
+```tmux
+set -g @kube-context-bg 'default'
+```
+
+Default: `default`
 
 ### Bold
 
@@ -64,12 +74,28 @@ Enable or disable bold formatting:
 set -g @kube-context-bold 'bold'
 ```
 
-Default: `bold`
+Default: empty (no bold)
 
-To disable bold, set it to empty:
+To enable bold:
 
 ```tmux
-set -g @kube-context-bold ''
+set -g @kube-context-bold 'bold'
+```
+
+### Separator
+
+Add a separator character after the Kubernetes context:
+
+```tmux
+set -g @kube-context-separator ''
+```
+
+Default: empty (no separator)
+
+For powerline-style separators:
+
+```tmux
+set -g @kube-context-separator ''
 ```
 
 ## Example Configuration
@@ -80,8 +106,10 @@ set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'babarot/tmux-kube-context'
 
 # Customize appearance
-set -g @kube-context-color 'cyan'
+set -g @kube-context-fg 'cyan'
+set -g @kube-context-bg 'black'
 set -g @kube-context-bold 'bold'
+set -g @kube-context-separator ''
 
 # Initialize TPM (keep this at the bottom)
 run '~/.tmux/plugins/tpm/tpm'
@@ -98,8 +126,12 @@ The plugin displays the context and namespace in the following format:
 For example:
 - `(gke_my-project/default)`
 - `(minikube/kube-system)`
+- `(my-cluster/production)`
 
-GCP region suffixes (e.g., `_asia-northeast1-a`) are automatically stripped for cleaner display.
+Cloud provider region suffixes are automatically stripped for cleaner display:
+- GCP: `gke_project_asia-northeast1-a_cluster` → `gke_project_cluster`
+- AWS: `arn:aws:eks:us-west-2:account:cluster/name` → `name`
+- Azure: `context_eastus` → `context`
 
 ## Requirements
 

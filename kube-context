@@ -1,50 +1,37 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -eo pipefail
 
 # Ensure common binary paths are available
 export PATH="/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:${PATH}"
 
-while (( ${#} > 0 ))
-do
-  case "${1}" in
-    --context)
-      context="${2}"
-      shift
-      shift
-      ;;
-    --context=*)
-      context="${1#*=}"
-      shift
-      ;;
-  esac
-done
-
-if ! type kubectl &>/dev/null; then
-  echo "kubectl command not found" >&2
-  exit 1
-fi
-
-if ! context="$(kubectl config current-context 2>/dev/null)"; then
-  echo "NaN"
+# Check if kubectl is available
+if ! command -v kubectl &>/dev/null; then
+  echo "N/A"
   exit 0
 fi
 
-namespace="$(kubectl config view -o "jsonpath={.contexts[?(@.name==\"${context}\")].context.namespace}")"
+# Get current context
+if ! context="$(kubectl config current-context 2>/dev/null)"; then
+  echo "N/A"
+  exit 0
+fi
+
+# Get namespace for the current context
+namespace="$(kubectl config view -o "jsonpath={.contexts[?(@.name==\"${context}\")].context.namespace}" 2>/dev/null)"
 if [[ -z "${namespace}" ]]; then
   namespace="default"
 fi
 
-regions=(
-  asia-northeast1-a
-  asia-northeast1-b
-  asia-northeast1-c
-  asia-east1-a
-  asia-east1-b
-  asia-east1-c
-)
-
-for region in "${regions[@]}"
-do
-  context=${context%_${region}*}
-done
+# Strip cloud provider region suffixes for cleaner display
+# Handles common patterns from GCP, AWS, Azure
+# Examples:
+#   - GCP: gke_project_asia-northeast1-a_cluster -> gke_project_cluster
+#   - AWS: arn:aws:eks:us-west-2:account:cluster/name -> cluster/name
+#   - Azure: context_eastus -> context
+context="${context##*/}"  # Remove path-like prefixes (for ARN)
+context="${context%%_[a-z]*-[a-z]*-[0-9]*}"  # Remove GCP-style region suffix
+context="${context%%_[a-z]*-[a-z]*[0-9]*}"   # Remove Azure/AWS-style region suffix
+context="${context%%_[a-z]*[0-9]*}"          # Remove short region patterns
 
 echo "${context}/${namespace}"

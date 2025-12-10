@@ -1,29 +1,30 @@
 #!/usr/bin/env bash
 
+set -e
+
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Get user configuration or use generic defaults
-kube_bg=$(tmux show-option -gqv "@kube-context-bg")
-kube_bg=${kube_bg:-"default"}
+# Get user configuration or use defaults
+get_tmux_option() {
+  local option="$1"
+  local default="$2"
+  local value
+  value="$(tmux show-option -gqv "${option}")"
+  echo "${value:-${default}}"
+}
 
-kube_fg=$(tmux show-option -gqv "@kube-context-fg")
-kube_fg=${kube_fg:-"blue"}
+kube_bg="$(get_tmux_option "@kube-context-bg" "default")"
+kube_fg="$(get_tmux_option "@kube-context-fg" "blue")"
+kube_bold="$(get_tmux_option "@kube-context-bold" "")"
+kube_separator="$(get_tmux_option "@kube-context-separator" "")"
 
-kube_bold=$(tmux show-option -gqv "@kube-context-bold")
-kube_bold=${kube_bold:-""}
-
-kube_separator=$(tmux show-option -gqv "@kube-context-separator")
-kube_separator=${kube_separator:-""}
-
-# Format the display string
+# Build display format string
 display_format="#[bg=${kube_bg},fg=${kube_fg}"
-if [ -n "${kube_bold}" ]; then
-  display_format="${display_format},${kube_bold}"
-fi
+[[ -n "${kube_bold}" ]] && display_format="${display_format},${kube_bold}"
 display_format="${display_format}] (#(${CURRENT_DIR}/kube-context)) "
 
 # Add separator if configured
-if [ -n "${kube_separator}" ]; then
+if [[ -n "${kube_separator}" ]]; then
   display_format="${display_format}#[bg=default,fg=${kube_bg}]${kube_separator}#[default] "
 else
   display_format="${display_format}#[default]"
