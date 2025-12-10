@@ -128,6 +128,41 @@ To find your current hostname, run:
 hostname -s
 ```
 
+### Enabled Directories
+
+Specify which directories should enable this plugin. The plugin will only display when you're working in or under these directories:
+
+```tmux
+set -g @kube-context-enabled-dirs '~/src/github.com/work ~/projects/kubernetes'
+```
+
+Default: empty (enabled in all directories)
+
+When set, the plugin will only activate when the current working directory is under one of the space-separated directory paths. This is particularly useful when:
+- You work on both Kubernetes and non-Kubernetes projects
+- You want the context display only in specific project directories
+- You share your tmux configuration but work in different project structures
+
+Example use case:
+```tmux
+# Only show Kubernetes context when working in specific directories
+set -g @kube-context-enabled-dirs '~/src/github.com/company ~/work/k8s-projects'
+```
+
+**Note:** You can use `~` to represent your home directory. The check includes subdirectories automatically.
+
+### Combining Conditions
+
+Both `@kube-context-enabled-hosts` and `@kube-context-enabled-dirs` can be used together:
+
+```tmux
+# Show only on work laptop AND in work directories
+set -g @kube-context-enabled-hosts 'work-laptop'
+set -g @kube-context-enabled-dirs '~/work'
+```
+
+When both are set, **both conditions must be satisfied** for the plugin to display.
+
 ## Example Configuration
 
 ```tmux
@@ -143,6 +178,9 @@ set -g @kube-context-separator ''
 
 # Enable only on specific hosts (optional)
 set -g @kube-context-enabled-hosts 'work-laptop company-desktop'
+
+# Enable only in specific directories (optional)
+set -g @kube-context-enabled-dirs '~/work ~/src/github.com/company'
 
 # Initialize TPM (keep this at the bottom)
 run '~/.tmux/plugins/tpm/tpm'
