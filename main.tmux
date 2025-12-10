@@ -13,6 +13,17 @@ get_tmux_option() {
   echo "${value:-${default}}"
 }
 
+# Check if plugin should be enabled on this host
+enabled_hosts="$(get_tmux_option "@kube-context-enabled-hosts" "")"
+if [[ -n "${enabled_hosts}" ]]; then
+  current_host="$(hostname -s 2>/dev/null || hostname)"
+  # Check if current hostname is in the enabled list
+  if [[ ! " ${enabled_hosts} " =~ " ${current_host} " ]]; then
+    # Host not in whitelist, exit without setting status-left
+    exit 0
+  fi
+fi
+
 kube_bg="$(get_tmux_option "@kube-context-bg" "default")"
 kube_fg="$(get_tmux_option "@kube-context-fg" "blue")"
 kube_bold="$(get_tmux_option "@kube-context-bold" "")"

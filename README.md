@@ -98,6 +98,32 @@ For powerline-style separators:
 set -g @kube-context-separator ''
 ```
 
+### Enabled Hosts
+
+Specify which hosts (by hostname) should enable this plugin. Useful when sharing tmux.conf across multiple machines:
+
+```tmux
+set -g @kube-context-enabled-hosts 'work-macbook company-laptop'
+```
+
+Default: empty (enabled on all hosts)
+
+When set, the plugin will only activate on hosts whose hostname matches one of the space-separated values. This is particularly useful when:
+- You share your tmux configuration between work and personal machines
+- kubectl is only installed on specific machines
+- You want the Kubernetes context display on work machines but not on personal ones
+
+Example use case:
+```tmux
+# Only show Kubernetes context on work machines
+set -g @kube-context-enabled-hosts 'work-macbook-pro company-desktop'
+```
+
+To find your current hostname, run:
+```bash
+hostname -s
+```
+
 ## Example Configuration
 
 ```tmux
@@ -110,6 +136,9 @@ set -g @kube-context-fg 'cyan'
 set -g @kube-context-bg 'black'
 set -g @kube-context-bold 'bold'
 set -g @kube-context-separator ''
+
+# Enable only on specific hosts (optional)
+set -g @kube-context-enabled-hosts 'work-laptop company-desktop'
 
 # Initialize TPM (keep this at the bottom)
 run '~/.tmux/plugins/tpm/tpm'
