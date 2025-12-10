@@ -4,9 +4,9 @@ set -e
 
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Check if plugin should be enabled by running the script
-# If it exits with non-zero, don't set status-left
-if ! "${CURRENT_DIR}/scripts/kube-context.sh" &>/dev/null; then
+# Check if plugin should be enabled (hostname/directory conditions)
+# If conditions don't match, don't set status-left
+if ! "${CURRENT_DIR}/scripts/check-enabled.sh"; then
   exit 0
 fi
 
