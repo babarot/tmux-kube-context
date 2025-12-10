@@ -4,6 +4,12 @@ set -e
 
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Check if plugin should be enabled by running the script
+# If it exits with non-zero, don't set status-left
+if ! "${CURRENT_DIR}/scripts/kube-context.sh" &>/dev/null; then
+  exit 0
+fi
+
 # Get user configuration or use defaults
 get_tmux_option() {
   local option="$1"

@@ -21,7 +21,7 @@ if [[ -n "${enabled_hosts}" ]]; then
   # Check if current hostname is in the enabled list
   if [[ ! " ${enabled_hosts} " =~ " ${current_host} " ]]; then
     # Host not in whitelist, don't display
-    exit 0
+    exit 1
   fi
 fi
 
@@ -43,7 +43,7 @@ if [[ -n "${enabled_dirs}" ]]; then
   done
   if [[ "${dir_matched}" != "true" ]]; then
     # Directory not in whitelist, don't display
-    exit 0
+    exit 1
   fi
 fi
 
